@@ -2,11 +2,11 @@ import express from "express";
 import { db } from "./db.js";
 import { validationResult,param,body,query } from "express-validator";
 
-export const mesasRouter = express
+export const menuRouter = express
 .Router()
-//buscar todas las mesas
+//buscar menu completo
 .get("/", async (req, res) => {
-  const [rows, fields] = await db.execute("SELECT id, capacidad, ocupada FROM mesas");
+  const [rows, fields] = await db.execute("SELECT id, nombre, descripcion, precio FROM menu");
   res.send(rows);
 })
 //buscar mesa por numedo de id
@@ -17,20 +17,12 @@ export const mesasRouter = express
   }
   const id = req.params.id;
   const [rows, fields] = await db.execute(
-    "SELECT id, capacidad, ocupada FROM mesas WHERE id = :id",
+    "SELECT id, nombre, descripcion, precio FROM menu WHERE id = :id",
     { id }
   );
   if (rows.length > 0) {
     res.send(rows[0]);
   } else {
-    res.status(404).send({ mensaje: "Mesa no encontrada" });
+    res.status(404).send({ mensaje: "Menu no encontrado" });
   }
 })
-// buscar orden con id de mesa
-.get("/:id",)
-
-//buscar reservacion con id mesa
-
-// cambiar estado de la mesa
-
-
