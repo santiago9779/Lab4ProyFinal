@@ -3,7 +3,7 @@ import "dotenv/config"
 
 //conectar con la base de datos
 export const db = await mysql2.createConnection({
-    host: process.env.BD_host,
+    host: process.env.DB_host,
     user: process.env.DB_user,
     password: process.env.DB_password,
     database: process.env.DB_database,
