@@ -16,6 +16,7 @@ export const mesasRouter = express
   
   
   //buscar mesa por id --- funciona
+
   .get("/:id", param("id").isInt({ min: 1 }), async (req, res) => {
     const validacion = validationResult(req);
     if (!validacion.isEmpty()) {
@@ -34,25 +35,8 @@ export const mesasRouter = express
   })
   
   
-  // buscar orden con id de mesa -- funciona -- solucionar registro de orden en tabla mesas
-  .get("/:id/orden", param("id").isInt({ min: 1 }),param("mesa").isAlpha({min:4, max:4}), async (req, res) => {
-    const { id } = req.params;
-    const [rows, fields] = await db.execute(
-      "SELECT o.id, o.fecha, o.estado \
-      FROM orden o \
-      JOIN mesas m ON o.id = m.id_orden \
-      WHERE m.id = :id",
-      { id }
-    );
-    if (rows.length > 0) {
-      res.send(rows);
-    } else {
-      res.status(404).send({ mensaje: "Orden no encontrada" });
-    }
-  })
 
-
-  // cambiar estado de la mesa
+// cambiar estado de la mesa
   .put('/:id',
     body("capacidad").isNumeric(),
     body("ocupada").isAlpha(),
@@ -60,9 +44,9 @@ export const mesasRouter = express
     async(req,res)=>{
     const {id} = req.params;
     const {capacidad, ocupada} = req.body;
-    const mesa = {capacidad, ocupada, id_orden} 
-    await db.execute("UPDATE mesas SET capacidad=:capacidad, ocupada=:ocupada WHERE id = :id",{id, capacidad: mesa.capacidad, ocupada: mesa.ocupada});
-    res.send({capacidad, ocupada, id_orden})
+    const mesa = {capacidad, ocupada} 
+    await db.execute("UPDATE mesa SET capacidad=:capacidad, ocupada=:ocupada WHERE id = :id",{id, capacidad: mesa.capacidad, ocupada: mesa.ocupada});
+    res.send({capacidad, ocupada})
   })
 
 
