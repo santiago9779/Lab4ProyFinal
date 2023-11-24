@@ -73,9 +73,9 @@ export const personalRouter = express
     res.send({id,nombre,rol, usuario, password})
   })
 
-//eliminar usuario, no funciona, problema con configuracion de foreing key
+//eliminar usuario funcionando
 
-/*
+
   .delete("/:id", param("id").isInt({ min: 1, max:2 }), async (req, res) => {
     const { id } = req.params;
     await db.execute("DELETE FROM personal WHERE id = :id", { id });
@@ -83,7 +83,7 @@ export const personalRouter = express
 
   })
 
-*/
+
   
   
 ;

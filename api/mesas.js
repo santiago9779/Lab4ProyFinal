@@ -40,7 +40,6 @@ export const mesasRouter = express
   .put('/:id',
     body("capacidad").isNumeric(),
     body("ocupada").isAlpha(),
-    // body("id_oreden").isInt(),
     async(req,res)=>{
     const {id} = req.params;
     const {capacidad, ocupada} = req.body;
@@ -49,6 +48,16 @@ export const mesasRouter = express
     res.send({capacidad, ocupada})
   })
 
+
+//eliminar mesa funcionando
+
+
+.delete("/:id", param("id").isInt(), async (req, res) => {
+  const { id } = req.params;
+  await db.execute("DELETE FROM mesa WHERE id = :id", { id });
+  res.send("ok");
+
+})
 
 
 ;

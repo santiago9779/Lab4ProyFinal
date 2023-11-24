@@ -62,9 +62,9 @@ CREATE TABLE IF NOT EXISTS `mydb1`.`orden` (
   `id` INT NOT NULL AUTO_INCREMENT,
   `fecha` DATE NOT NULL,
   `estado` VARCHAR(45) CHARACTER SET 'utf8mb3' NOT NULL,
-  `id_mesa` INT NOT NULL,
-  `id_personal` INT NOT NULL,
-  `id_menu` INT NOT NULL,
+  `id_mesa` INT ,
+  `id_personal` INT ,
+  `id_menu` INT ,
   `nombre` VARCHAR(50) NULL DEFAULT NULL,
   `descripcion` VARCHAR(50) NULL DEFAULT NULL,
   `precio` DECIMAL(10,2) NULL DEFAULT NULL,
@@ -74,13 +74,16 @@ CREATE TABLE IF NOT EXISTS `mydb1`.`orden` (
   INDEX `fk_orden_menu` (`id_menu` ASC) VISIBLE,
   CONSTRAINT `fk_orden_menu`
     FOREIGN KEY (`id_menu`)
-    REFERENCES `mydb1`.`menu` (`id`),
+    REFERENCES `mydb1`.`menu` (`id`)
+    ON DELETE SET NULL ON UPDATE CASCADE,
   CONSTRAINT `fk_orden_mesa`
     FOREIGN KEY (`id_mesa`)
-    REFERENCES `mydb1`.`mesa` (`id`),
+    REFERENCES `mydb1`.`mesa` (`id`)
+    ON DELETE SET NULL ON UPDATE CASCADE,
   CONSTRAINT `fk_orden_personal`
     FOREIGN KEY (`id_personal`)
-    REFERENCES `mydb1`.`personal` (`id`))
+    REFERENCES `mydb1`.`personal` (`id`)
+    ON DELETE SET NULL ON UPDATE SET NULL)
 ENGINE = InnoDB
 DEFAULT CHARACTER SET = utf8mb4
 COLLATE = utf8mb4_0900_ai_ci;
