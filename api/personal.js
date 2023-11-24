@@ -36,7 +36,8 @@ export const personalRouter = express
     }
   )
 
-  //todos los usuarios
+//todos los usuarios
+
   .get("/", async (req, res) => {
     const [rows, fields] = await db.execute(
       "SELECT id, nombre, rol, usuario, password FROM personal"
@@ -44,50 +45,45 @@ export const personalRouter = express
     res.send(rows);
   })
 
-//   //usuario por id
-//   .get("/:id",
-//   param("id").isInt({min:1}),
-//    async (req, res) => {
-//     const { id } = req.params;
-//     const [rows, fields] = await db.execute(
-//       "SELECT id, usuario, password, rol FROM personal WHERE id = :id",
-//       { id }
-//     );
-//     if (rows.length > 0) {
-//       res.send(rows[0]);
-//     } else {
-//       res.status(404).send({ mensaje: "ususario no encontrado" });
-//     }
-//   })
 
-//   //modificar usuario
-//   .put(    
-//     "/:id",
-//     param("id").isInt({min:1,max:2}), 
-//     body("usuario").isString().isLength({min:8,max:15}),
-//     body("password").isString().isLength({min:5,max:50}),
-//     body("rol").isAlpha({min: 4, max:10}),
-//     async (req, res) => {
-//       const validacion = validationResult(req);
-//       if (!validacion.isEmpty()) {
-//         res.status(400).send({ errors: validacion.array() });
-//         return;
-//       }
-//       const {id} = req.params
-//       const {usuario, password,rol} = req.body;
-//       const persona = {usuario, password, rol}
-//       await db.execute(
-//         "UPDATE personalSET usuario=:usuario, password=:password, rol=:rol WHERE id = :id",{id, usuario: persona.usuario, password: persona.password, rol: persona.rol });
-//       res.status(201).send({ id, usuario, password, rol });
-//   })
+//usuario por id funciona...
 
-// //eliminar usuario
-//   .delete("/:id", param("id").isInt({ min: 1, max:2 }), async (req, res) => {
-//     const { id } = req.params;
-//     await db.execute("DELETE FROM personal WHERE id = :id", { id });
-//     res.send("ok");
+  .get("/:id",
+  param("id").isInt({min:1}),
+   async (req, res) => {
+    const { id } = req.params;
+    const [rows, fields] = await db.execute(
+      "SELECT id, usuario, password, rol FROM personal WHERE id = :id",
+      { id }
+    );
+    if (rows.length > 0) {
+      res.send(rows[0]);
+    } else {
+      res.status(404).send({ mensaje: "ususario no encontrado" });
+    }
+  })
 
-//   })
+//modificar usuario
+
+  .put('/:id',async(req,res)=>{
+    const {id} = req.params;
+    const {nombre,rol, usuario, password} = req.body;
+    const personal = {nombre,rol, usuario, password} 
+    await db.query("UPDATE personal SET ? WHERE id = ?",[personal, id]);
+    res.send({id,nombre,rol, usuario, password})
+  })
+
+//eliminar usuario, no funciona, problema con configuracion de foreing key
+
+/*
+  .delete("/:id", param("id").isInt({ min: 1, max:2 }), async (req, res) => {
+    const { id } = req.params;
+    await db.execute("DELETE FROM personal WHERE id = :id", { id });
+    res.send("ok");
+
+  })
+
+*/
   
   
 ;
