@@ -1,10 +1,8 @@
 import express from "express";
 import { db } from "./db.js";
 import { validationResult, param, body, query } from "express-validator";
-
 export const mesasRouter = express
   .Router()
-
 
   //buscar todas las mesas --- funciona
   .get("/", async (req, res) => {
@@ -13,10 +11,11 @@ export const mesasRouter = express
     );
     res.send(rows);
   })
-  
-  
+    
   //buscar mesa por id --- funciona
-  .get("/:id", param("id").isInt({ min: 1 }), async (req, res) => {
+  .get("/:id", 
+  param("id").isInt().isLength({min:1, max:2}), 
+  async (req, res) => {
     const validacion = validationResult(req);
     if (!validacion.isEmpty()) {
       res.status(400).send({ errors: validacion.array() });
@@ -33,9 +32,11 @@ export const mesasRouter = express
     }
   })
   
-  
   // buscar orden con id de mesa -- funciona -- solucionar registro de orden en tabla mesas
-  .get("/:id/orden", param("id").isInt({ min: 1 }),param("mesa").isAlpha({min:4, max:4}), async (req, res) => {
+  .get("/:id/orden", 
+  param("id").isInt().isLength({ min: 1, max:2 }),
+  param("orden").isAlpha().isLength({max:4}), 
+  async (req, res) => {
     const { id } = req.params;
     const [rows, fields] = await db.execute(
       "SELECT o.id, o.fecha, o.estado \
@@ -51,17 +52,16 @@ export const mesasRouter = express
     }
   })
 
-
   // cambiar estado de la mesa
 .put('/:id',
-body("capacidad").isNumeric(),
-body("ocupada").isAlpha(),
-body("id_oreden").isInt(),
+param("id").isInt().isLength({min:1,max:2}),
+body("capacidad").isNumeric().isLength({min:1,max:2}),
+body("ocupada").isInt().isLength({max:1}),
+body("id_oreden").isInt().isLength({min:1,max:2}),
  async(req,res)=>{
   const {id} = req.params;
-  const {capacidad, ocupada} = req.body;
-  const mesa = {capacidad, ocupada} 
-  await db.query("UPDATE mesas SET ? WHERE id = ?",[mesa, id]);
-  res.send({capacidad, ocupada})
+  const {capacidad, ocupada, id_orden} = req.body;
+  const mesa = {capacidad, ocupada, id_orden} 
+  await db.execute("UPDATE mesas SET capacidad=:capacidad, ocupada=:ocupada WHERE id = :id",{id, capacidad: mesa.capacidad, ocupada: mesa.ocupada});
+  res.send({capacidad, ocupada, id_orden})
 })
-  

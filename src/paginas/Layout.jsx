@@ -21,6 +21,9 @@ const Layout = () => {
                     <li>
                         <NavLink className={({isActive})=>isActive ? "active-green" : null} to="/mesas" >Mesas</NavLink>
                     </li>
+                    <li>
+                        <NavLink className={({isActive})=>isActive ? "active-green" : null} to="/menu" >Menu</NavLink>
+                    </li>
                 </ul>
             </nav>
             <Outlet/>

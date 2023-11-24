@@ -5,7 +5,8 @@ import { validationResult, param, body, query } from "express-validator";
 export const ordenRouter = express
   .Router()
   //buscar todas las ordenes -- funciona
-  .get("/", async (req, res) => {
+  .get("/", 
+  async (req, res) => {
     const [rows, fields] = await db.execute(
       "SELECT id, fecha, estado, id_mesa FROM orden"
     );
@@ -13,7 +14,9 @@ export const ordenRouter = express
   })
 
   //buscar orden por id -- funciona
-  .get("/:id", param("id").isInt({ min: 1 }), async (req, res) => {
+  .get("/:id", 
+  param("id").isInt().isLength({min:1,max:2}), 
+  async (req, res) => {
     const validacion = validationResult(req);
     if (!validacion.isEmpty()) {
       res.status(400).send({ errors: validacion.array() });
@@ -32,7 +35,9 @@ export const ordenRouter = express
 
   //buscar mesa por id de orden -- funciona
   .get("/:id/mesa",
-  param("id").isInt({min:1,max:2}), async (req, res) => {
+  param("id").isInt().isLength({min:1, max:2}),
+  param("mesa").isLength({max:4}), 
+  async (req, res) => {
     const { id } = req.params;
     const [rows, fields] = await db.execute(
       "SELECT m.id, m.capacidad, m.ocupada \
@@ -59,20 +64,22 @@ export const ordenRouter = express
   .post(    
     "/",
     body("fecha").isString().isLength({min:8,max:15}),
-    body("estado").isString(),
-    body("id_mesa").isInt(),
+    body("estado").isString().isLength({min:5,max:50}),
+    body("id_mesa").isInt().isLength({min:1,max:2}),
+    body("id_personal").isInt().isLength({min:1,max:2}),
+    body("id_menu").isInt().isLength({min:1,max:2}),
     async (req, res) => {
       const validacion = validationResult(req);
       if (!validacion.isEmpty()) {
         res.status(400).send({ errors: validacion.array() });
         return;
       }
-      const {fecha, estado, id_mesa} = req.body;
+      const {fecha, estado, id_mesa, id_personal, id_menu} = req.body;
       await db.execute(
-        "INSERT INTO orden (fecha, estado, id_mesa) VALUES(:fecha, :estado, :id_mesa)",
-        { fecha, estado, id_mesa}
+        "INSERT INTO orden (fecha, estado, id_mesa, id_personal, id_menu) VALUES(:fecha, :estado, :id_mesa, :id_personal, :id_menu)",
+        { fecha, estado, id_mesa, id_personal, id_menu}
       );
-      res.status(201).send({ id, fecha, estado, id_mesa });
+      res.status(201).send({fecha, estado, id_mesa, id_personal, id_menu });
     }
   )
 
@@ -87,9 +94,10 @@ export const ordenRouter = express
 
   .put(    
     "/:id",
-    body("fecha").isString(),
-    body("estado").isString(),
-    body("id_mesa").isInt(),
+    param("id").isInt().isLength({min:1,max:2}), 
+    body("fecha").isString().isLength({min:8,max:15}),
+    body("estado").isString().isLength({min:5,max:50}),
+    body("id_mesa").isInt().isLength({min:1,max:2}),
     async (req, res) => {
       const validacion = validationResult(req);
       if (!validacion.isEmpty()) {
@@ -99,14 +107,14 @@ export const ordenRouter = express
       const {id} = req.params
       const {fecha, estado, id_mesa} = req.body;
       const orden = {fecha, estado, id_mesa}
-      await db.query(
-        "UPDATE orden SET ? WHERE id = ?",[orden,id]);
+      await db.execute(
+        "UPDATE orden SET fecha=:fecha, estado=:estado, id_mesa=:id_mesa WHERE id = :id",{id, fecha: orden.fecha, estado: orden.estado, id_mesa: orden.id_mesa });
       res.status(201).send({ id, fecha, estado, id_mesa });
       }
     )
  
 //eliminar orden (delete) -- funciona
-  .delete("/:id", param("id").isInt({ min: 1,max:2 }), async (req, res) => {
+  .delete("/:id", param("id").isInt().isLength({ min: 1, max:2 }), async (req, res) => {
     const { id } = req.params;
     await db.execute("DELETE FROM orden WHERE id = :id", { id });
     res.send("ok");
