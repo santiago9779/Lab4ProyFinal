@@ -8,7 +8,6 @@ export const RequiredAuth = ({ children }) => {
   if (!sesion) {
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
-
   return children;
 };
 
@@ -18,6 +17,5 @@ export const Visible = ({ rol, children }) => {
   if (!sesion || sesion.rol !== rol) {
     return null;
   }
-
   return children;
 };

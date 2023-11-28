@@ -1,33 +1,38 @@
-import {Outlet, Link, NavLink} from "react-router-dom"
+import { Link, Outlet } from "react-router-dom";
 import { AuthStatus } from "./AuthStatus";
 
-const Layout = () => {
-    return <div>
-        <AuthStatus/>
-            <nav>
-                <ul>
-                    <li>
-                        <NavLink end className={({isActive})=>isActive ? "active-green" : null} to="/" >Restaurante</NavLink>
-                    </li>
-                    <li>
-                        <NavLink className={({isActive})=>isActive ? "active-green" : null} to="/login">Login</NavLink>
-                    </li>
-                    <li>
-                        <NavLink className={({isActive})=>isActive ? "active-green" : null} to="/personal">Personal</NavLink>
-                    </li>
-                    <li>
-                        <NavLink className={({isActive})=>isActive ? "active-green" : null} to="/orden" >Ordenes</NavLink>
-                    </li>
-                    <li>
-                        <NavLink className={({isActive})=>isActive ? "active-green" : null} to="/mesas" >Mesas</NavLink>
-                    </li>
-                    <li>
-                        <NavLink className={({isActive})=>isActive ? "active-green" : null} to="/menu" >Menu</NavLink>
-                    </li>
-                </ul>
-            </nav>
-            <Outlet/>
-    </div>
-}
-
-export default Layout;
+export const Layout = () => {
+  return (
+    <>
+      
+      <nav className="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div className="container">
+          <ul className="navbar-nav">
+            <li className="nav-item">
+              <Link to="/mesas" className="nav-link">
+                mesas
+              </Link>
+            </li>
+            <li className="nav-item">
+              <Link to="/menu" className="nav-link">
+                menu
+              </Link>
+            </li>
+            <li className="nav-item">
+              <Link to="/orden" className="nav-link">
+                orden
+              </Link>
+            </li>
+            <li className="nav-item">
+              <Link to="/personal" className="nav-link">
+                personal
+              </Link>
+            </li>
+          </ul>
+          <AuthStatus />
+        </div>
+      </nav>
+      <Outlet />
+    </>
+  );
+};
