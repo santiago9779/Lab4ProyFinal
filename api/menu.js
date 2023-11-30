@@ -50,10 +50,10 @@ export const menuRouter = express
 
   // modificar menu
   .put('/:id',
-  body("nombre").isString().isLength({min:4,max:20}),
-  body("descripcion").isString().isLength({min:5, max:100}),
-  body("precio").isDecimal(),
-  async(req,res)=>{
+    body("nombre").isString().isLength({min:4,max:20}),
+    body("descripcion").isString().isLength({min:5, max:100}),
+    body("precio").isDecimal(),
+    async(req,res)=>{
     const {id} = req.params;
     const {nombre, descripcion, precio} = req.body;
     const menu = {nombre, descripcion, precio} 
@@ -84,7 +84,7 @@ export const menuRouter = express
   
   // eliminar menu -- funciona
   .delete("/:id",
-  param("id").isInt({min:1}), async (req,res)=>{
+    param("id").isInt({min:1}), async (req,res)=>{
     const{id}=req.params;
     await db.execute("DELETE FROM menu WHERE id = :id", {id});
     res.send("menu eliminado")

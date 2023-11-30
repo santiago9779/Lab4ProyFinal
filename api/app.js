@@ -3,7 +3,7 @@ import cors from "cors";
 
 //importacion de modulos
 import { mesasRouter } from "./mesas.js";
-import { reservacionRouter } from "./reservaciones.js";
+import { restauranteRouter } from "./restaurante.js";
 import { menuRouter } from "./menu.js";
 import { ordenRouter } from "./orden.js";
 import { authConfig, authRouter } from "./auth.js";
@@ -18,7 +18,7 @@ authConfig();
 // uso de Routers
 
 app.use("/mesas", mesasRouter);
-app.use("/reservaciones", reservacionRouter);
+app.use("/restaurante", restauranteRouter);
 app.use("/menu", menuRouter);
 app.use("/orden", ordenRouter);
 app.use("/auth", authRouter)

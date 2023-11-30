@@ -9,8 +9,6 @@ export const personalRouter = express
 
   .post(
     "/",
-    body("nombre").isAlpha().isLength({min:4, max:20}),
-    body("rol").isAlpha().isLength({min:4,max:20}),
     body("usuario").isAlphanumeric().isLength({ min: 1, max: 25 }),
     body("password").isStrongPassword({
       minLength: 8,
@@ -19,37 +17,38 @@ export const personalRouter = express
       minNumbers: 1,
       minSymbols: 0,
     }),
+    body("rol").isAlpha().isLength({min:4,max:20}),
     async (req, res) => {
       const validacion = validationResult(req);
       if (!validacion.isEmpty()) {
         res.status(400).send({ errors: validacion.array() });
         return;
       }
-      const {id, nombre, rol, usuario, password } = req.body;
+      const {id, usuario, password, rol } = req.body;
       const passwordHashed = await bcrypt.hash(password, 8);
       await db.query(
-        "INSERT INTO personal (nombre, rol, usuario, password) VALUES (:nombre, :rol, :usuario, :password)",
+        "INSERT INTO personal (usuario, password, rol) VALUES (:usuario, :password,  :rol)",
         { nombre, rol, usuario, password: passwordHashed }
       );
-      res.status(201).send({ id,nombre, rol, usuario, password});
+      res.status(201).send({ id, usuario, password, rol});
     }
   )
 
   //todos los usuarios
   .get("/", async (req, res) => {
     const [rows, fields] = await db.execute(
-      "SELECT id, nombre, rol, usuario, password FROM personal"
+      "SELECT id, usuario, password, rol FROM personal"
     );
     res.send(rows);
   })
 
   //usuario por id
   .get("/:id",
-  param("id").isInt({min:1}),
+  param("id").isInt().isLength({min:1,max:2}),
    async (req, res) => {
     const { id } = req.params;
     const [rows, fields] = await db.execute(
-      "SELECT id, nombre, rol, usuario, password FROM personal WHERE id = :id",
+      "SELECT id, usuario, password, rol FROM personal WHERE id = :id",
       { id }
     );
     if (rows.length > 0) {
@@ -62,7 +61,7 @@ export const personalRouter = express
   //modificar usuario
   .put(    
     "/:id",
-    param("id").isInt({min:1,max:2}), 
+    param("id").isInt().isLength({min:1,max:2}), 
     body("usuario").isString().isLength({min:8,max:15}),
     body("password").isString().isLength({min:5,max:50}),
     body("rol").isAlpha({min: 4, max:10}),
@@ -76,8 +75,8 @@ export const personalRouter = express
       const {usuario, password, rol} = req.body;
       const persona = {usuario, password, rol}
       await db.execute(
-        "UPDATE personal SET nombre=:nombre ,rol=:rol, usuario=:usuario, password=:password WHERE id = :id",{id, nombre: persona.nombre,rol: persona.rol, usuario: persona.usuario, password: persona.password  });
-      res.status(201).send({ id, mombre, rol, usuario, password });
+        "UPDATE personal SET usuario=:usuario, password=:password, rol=:rol WHERE id = :id",{id, usuario: persona.usuario, password: persona.password,rol: persona.rol});
+      res.status(201).send({ id, usuario, password, rol });
   })
 
 //eliminar usuario
