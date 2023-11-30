@@ -6,15 +6,15 @@ export const AdminMenu = () => {
   const { sesion } = useAuthContext();
   const [menu, setMenu] = useState([]);
   const [nombre, setNombre] = useState("");
-  const [precio, setPrecio] = useState("");
+  const [precio, setPrecio] = useState(0);
   const [descripcion, setDescripcion] = useState("");
   const [editar, setEditar] = useState(false);
 
-  useEffect(() => {
-    fetch(`http://localhost:4000/menu`)
-      .then((res) => res.json())
-      .then((menu) => setMenu(menu));
-  }, []);
+  const obtenerMenu=async()=>{
+    const response= await fetch("http://localhost:4000/menu/")
+    const data = await response.json();
+    setMenu(data)
+  }
 
   const agregarMenu = async () => {
     const res = await fetch("http://localhost:4000/menu/", {
@@ -28,14 +28,16 @@ export const AdminMenu = () => {
     });
     if (res.ok) {
       const nuevoMenu = await res.json();
-      setMenu(...menu, setMenu(nuevoMenu));
+      setMenu([...menu, nuevoMenu]);
       setNombre("");
       setDescripcion("");
       setPrecio("");
       console.log("Menu agregado con exito");
+      obtenerMenu()
     } else {
       console.log("Fallo al agregar menu");
     }
+    
   };
 
   const eliminarMenu = async (id) => {
@@ -47,6 +49,7 @@ export const AdminMenu = () => {
       if (res.ok) {
         setMenu(menu.filter((men) => men.id !== id));
         console.log("menu eliminado");
+        obtenerMenu()
       } else {
         console.log("No se pudo eliminar el menu");
       }
@@ -64,9 +67,14 @@ export const AdminMenu = () => {
   const limpiarCampos = () => {
     setDescripcion("");
     setNombre("");
-    setPrecio("");
+    setPrecio(0);
     setEditar(false);
   };
+
+  
+  useEffect(() => {
+    obtenerMenu()
+  }, []);
 
   return (
     <>

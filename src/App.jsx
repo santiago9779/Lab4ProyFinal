@@ -2,13 +2,10 @@ import { useState } from 'react'
 import './App.css'
 import {Routes, Route} from "react-router-dom"
 import {Layout} from "/src/paginas/Layout.jsx"
-import {Mesas} from './paginas/Mesas.jsx'
 import Default from './paginas/Default'
 import  {Restaurante}  from './paginas/Restaurante.jsx'
 import { PersonalPage } from './paginas/PersonalPage'
 import { LoginPage } from './paginas/LoginPage'
-import { Ordenes } from './paginas/Ordenes'
-import { Menu } from './paginas/Menu'
 import { RequiredAuth } from './paginas/RequireAuth'
 import { AdminOrdenes } from './paginas/Adminordenes.jsx'
 import { AdminMenu } from './paginas/AdminMenu.jsx'
@@ -30,7 +27,7 @@ function App() {
                 <AdminOrdenes/>
               </RequiredAuth>}/>
             
-              <Route path='/' element={
+              <Route path='/restaurante' element={
               <RequiredAuth>
                 <Restaurante/>
               </RequiredAuth>}/>

@@ -5,24 +5,35 @@ import axios from "axios";
 export const AdminOrdenes = () => {
   const { sesion } = useAuthContext();
   const [ordenes, setOrdenes] = useState([]);
-  const [fecha, setFecha] = useState("");
-  const [estado, setEstado] = useState("");
-  const [id_mesa, setId_mesa] = useState("");
+  const [id_mesa, setId_mesa] = useState(0);
+  const [idmenu, setIdmenu]=useState(0)
   const [editar, setEditar] = useState(false);
-  const [nombre, setNombre] = useState("");
-  const [descripcion, setDescripcion] = useState("");
-  const [precio, setPrecio] = useState("");
 
-  useEffect(() => {
-    fetch(`http://localhost:4000/orden/`)
-      .then((res) => res.json())
-      .then((orden) => setOrdenes(orden));
-  }, []);
+  const obtenerOrdenes= async()=>{
+    const response = await fetch("http://localhost:4000/orden");
+    const data = await response.json()
+    setOrdenes(data)
+  }
 
   const agregarOrden = async () => {
-    const orden = { fecha: fecha, estado: estado, id_mesa: id_mesa };
-    const response = await axios.post("https://localhost:4000/orden", orden);
-    this.setOrdenes({ ordenes: response.orden });
+   const res=await fetch("http://localhost:4000/orden/",{
+    method: "POST",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({
+      id_mesa: id_mesa,
+      id_menu:idmenu
+    }),
+   });
+   if (res.ok){
+    const nuevaOrden = await res.json();
+    setOrdenes([...ordenes, nuevaOrden]);
+    setId_mesa(0)
+    setIdmenu(0)
+    console.log("orden agregada");
+    obtenerOrdenes()
+   }else{
+    console.log("fallo al agregar orden");
+   }
   };
 
   const eliminarOrden = async (id) => {
@@ -42,23 +53,17 @@ export const AdminOrdenes = () => {
 
   const editarOrden = (orden) => {
     setEditar(true);
-
-    setFecha(orden.fecha);
-    setEstado(orden.estado);
     setId_mesa(orden.id_mesa);
   };
 
   const limpiarCampos = () => {
-    setFecha("");
-    setEstado("");
-    setId_mesa("");
+    setIdmenu(0)
+    setId_mesa(0);
     setEditar(false);
   };
 
   const actualizarOrden = async (id) => {
     const ordenUpdate = {
-      fecha: setFecha(),
-      estado: setEstado(),
       id_mesa: setId_mesa(),
     };
     const response = await axios.put(`http://localhost:4000/orden/${id}`, {
@@ -72,29 +77,13 @@ export const AdminOrdenes = () => {
     const response = await axios.put('https://reqres.in/api/articles/1', article);
     this.setState({ updatedAt: response.data.updatedAt });
 }*/
+  useEffect(() => {
+  obtenerOrdenes();
+  }, []);
 
   return (
     <>
       <h1>Ordenes</h1>
-      <form className="text-center" action="">
-        <input
-          className="m-2"
-          type="text"
-          placeholder="fecha"
-          value={fecha}
-          onChange={(e) => {
-            setFecha(e.target.value);
-          }}
-        />
-        <input
-          className="m-2"
-          type="text"
-          placeholder="estado"
-          value={estado}
-          onChange={(e) => {
-            setEstado(e.target.value);
-          }}
-        />
         <input
           className="m-2"
           type="number"
@@ -104,33 +93,16 @@ export const AdminOrdenes = () => {
             setId_mesa(e.target.value);
           }}
         />
-        <input
+        <input 
           className="m-2"
-          type="text"
-          placeholder="nombre"
-          value={nombre}
-          onChange={(e) => {
-            setNombre(e.target.value);
+          type="number" 
+          placeholder="id menu"
+          value={idmenu}
+          onChange={(e)=>{
+            setIdmenu(e.target.value)
           }}
         />
-        <input
-          className="m-2"
-          type="text"
-          placeholder="descripcion"
-          value={descripcion}
-          onChange={(e) => {
-            setDescripcion(e.target.value);
-          }}
-        />
-        <input
-          className="m-2"
-          type="text"
-          placeholder="precio"
-          value={precio}
-          onChange={(e) => {
-            setPrecio(e.target.value);
-          }}
-        />
+        <form >
         <div>
           {editar ? (
             <div>
@@ -160,9 +132,9 @@ export const AdminOrdenes = () => {
           <tr>
             <th scope="col">#</th>
             <th scope="col">Fecha</th>
-            <th scope="col">Estado</th>
+          
             <th scoope="col">Id Mesa</th>
-            <th scoope="col">Id Personal</th>
+            <th scope="col">Id menu</th>
             <th scoope="col">Nombre</th>
             <th scoope="col">Descripcion</th>
             <th scoope="col">Precio</th>
@@ -175,9 +147,9 @@ export const AdminOrdenes = () => {
               <th scope="row">{orden.id}</th>
 
               <td>{orden.fecha}</td>
-              <td>{orden.estado}</td>
+          
               <td>{orden.id_mesa}</td>
-              <td>{orden.id_personal}</td>
+          
               <td>{orden.id_menu}</td>
               <td>{orden.nombre}</td>
               <td>{orden.descripcion}</td>

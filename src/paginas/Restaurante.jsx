@@ -1,146 +1,177 @@
 import { useState, useEffect, useRef } from "react";
-import {Mesas} from "/src/paginas/Mesas.jsx"
-import {Menu} from "/src/paginas/Menu.jsx";
-import {Ordenes} from "./Ordenes.jsx";
 import { useReactToPrint } from "react-to-print";
+import axios from "axios"
 
 export function Restaurante() {
   const [mesas, setMesas] = useState([]);
-  const [mesa, setMesa] = useState({});
   const [menu, setMenu] = useState([]);
-  const [producto, setProducto] = useState({});
-  const [cantidad, setCantidad] = useState(1);
-  const [id_orden, setId_orden] = useState(0);
-  const [items, setItems] = useState([]);
+  const [ordenes, setOrdenes] = useState([]);
+  const [idmenu,setIdmenu]=useState(0)
+  const [idmesa, setIdmesa]=useState(0)
 
   const componentRef = useRef();
 
-  const handlePrint = useReactToPrint({
-    content: () => componentRef.current,
-  });
-
   const obtenerMesas = async () => {
-    const response = await fetch("http://localhost:4000/mesas");
+    const response = await fetch("http://localhost:4000/restaurante/mesas");
     const data = await response.json();
     setMesas(data);
   };
-
   const obtenerMenu = async () => {
-    const response = await fetch("http://localhost:4000/menu");
+    const response = await fetch(`http://localhost:4000/restaurante/menu`);
     const data = await response.json();
     setMenu(data);
   };
-
-  const obtenerOrdenId = async (id_mesa) => {
-    const response = await fetch(
-      `http://localhost:4000/orden?id_mesa=${id_mesa}`
-    );
+  const obtenerOrdenes = async () => {
+    const response = await fetch(`http://localhost:4000/restaurante/orden`);
     const data = await response.json();
-    setId_orden(data);
+    setOrdenes(data);
   };
-
-  const agregarItem = async (parametros) => {
-    const response = await fetch("http://localhost:4000/orden/", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(parametros),
-    });
-    const data = await response.json();
-      setItems(data)
+  
+  /* export default function App() {
+  const url = "www.somewebsite.com";
+  const options = {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ name: "Irakli Tchigladze" })
   };
-
-  const quitarItem = async (item) => {
-    const parametros = {
-      productoId: item.producto_id,
-      id_orden: item.orden_id,
-    };
-    const response = await fetch("http://localhost:4000/detalle/quitar-item", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(parametros),
-    });
-    const data = await response.json();
-    setItems(data);
-    obtenerMenu();
-  };
-
   useEffect(() => {
-    obtenerMesas();
-    obtenerMenu();
+    const getData = async () => {
+       try {
+        const response = await fetch(url, options);
+        const data = await response.json();
+        return data;
+    } catch (e) {
+        return e;
+    }
+    }
+    getData()
   }, []);
+  return <div className="App"></div>;
+  } */
 
-  const handleSubmit = () => {
-    agregarItem({
-      productoId: producto.id,
-      id_orden: id_orden,
-      cantidad: cantidad,
+  const agregarOrden = async (event) => {
+    event.preventDefault()
+    const res= await fetch("http://localhost:4000/restaurante/orden/",{
+      method:"POST",
+      headers:{"Content-Type" : "application/json"},
+      body:JSON.stringify({
+        id_mesa:idmesa,
+        id_menu:idmenu
+        })
     });
-    setCantidad(1);
-  };
-
-  const handleMesa = (mesa) => {
-    obtenerOrdenId(mesa.id);
-    setMesa(mesa);
-  };
-
-  const handleProducto = (producto) => {
-    setProducto(producto);
-  };
-
-  const handleItem = (item) => {
-    quitarItem(item);
-  };
-
-  const incrementa = () => {
-    setCantidad(cantidad + 1);
-  };
-
-  const decrementa = () => {
-    if (cantidad > 1) {
-      setCantidad(cantidad - 1);
+    if (res.ok) {
+      const ordenNueva = await res.json();
+      setOrdenes([...ordenes, ordenNueva]);
+      setIdmenu(0);
+      setIdmesa(0);
+      console.log("orden agregada");
+      obtenerOrdenes()
+    } else {
+      console.log("Fallo al crear orden");
     }
   };
 
+  useEffect(()=>{
+    obtenerMenu()
+    obtenerMesas()
+    obtenerOrdenes()
+  },[])
+
   return (
     <div className="container">
-      <Mesas mesas={mesas} mesa={handleMesa} />
-      <br />
-      <h4>
-        {Object.keys(mesa).length > 0
-          ? `Mesa: ${mesa.id}, Capacidad: ${mesa.capacidad},Ocupada ${mesa.ocupada}`
-          : null}
-      </h4>
-      <Menu menu={menu} producto={handleProducto} />
-      <br />
-      <h4>
-        {Object.keys(producto).length > 0
-          ? `nombre: ${producto.nombre}, descripcion: ${producto.descripcion}, precio: ${producto.precio}`
-          : null}
-      </h4>
-      <br />
-      <div className="input-group container-md">
-        <span className="input-group-text">Cantidad</span>
-        <input type="text" value={cantidad} className="form-control" readOnly />
-        <button className="btn btn-outline-secondary" onClick={incrementa}>
-          +
-        </button>
-        <button className="btn btn-outline-secondary" onClick={decrementa}>
-          -
-        </button>
-        <button className="btn btn-success" onClick={handleSubmit}>
-          Añadir producto
-        </button>
+      <h4>Mesas</h4>
+      <table className="table">
+        <thead>
+          <tr>
+            <th scope="col">#</th>
+            <th scope="col">capacidad</th>
+            <th scope="col">ocupada</th>
+          </tr>
+        </thead>
+        <tbody>
+          {mesas.map((mes) => (
+            <tr key={mes.id} onClick={()=>{
+              setIdmesa(mes.id)
+            }}>
+              <th scope="row">{mes.id}</th>
+              <td>{mes.capacidad}</td>
+              <td>{mes.ocupada}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      <h4>Menu</h4>
+      <table className="table">
+        <thead>
+          <tr>
+            <th scope="col">#</th>
+            <th scope="col">Nombre</th>
+            <th scope="col">Descripcion</th>
+            <th scope="col">Precio</th>
+          </tr>
+        </thead>
+        <tbody>
+          {menu.map((men) => (
+            <tr key={men.id} onClick={()=>{
+              setIdmenu(men.id)
+            }}>
+              <th scope="row">{men.id}</th>
+              <td>{men.nombre }</td>
+              <td>{men.descripcion}</td>
+              <td>{men.precio}</td>
+              <td>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      <div>
+        <form action="">
+      <input 
+        value={idmesa}
+        onChange={(e) => {
+          setIdmesa(e.target.value)}}
+        placeholder="mesa"
+        type="number" />
+      <input
+        value={idmenu}
+        onChange={(e) => {
+          setIdmesa(e.target.value)}}
+        placeholder="id menu"
+        type="number" />
+      <button type="submit" onClick={(e)=>{agregarOrden(e)}}>agregar a orden</button>
+      </form>
       </div>
-      <br />
-      <br />
-      {Object.keys(items).length > 0 ? (
-        <div>
-          <Ordenes ref={componentRef} items={items} item={handleItem} />
-          <button className="btn btn-primary float-end" onClick={handlePrint}>
-            Imprimir Factura
-          </button>
-        </div>
-      ) : null}
+      <h4>Ordenes</h4>
+      <table className="table ">
+        <thead>
+          <tr>
+            <th scope="col">#</th>
+            <th scope="col">Fecha</th>
+            <th scope="col">Estado</th>
+            <th scoope="col">Id Mesa</th>
+            <th scoope="col">Id menu</th>
+            <th scoope="col">Nombre</th>
+            <th scoope="col">Descripcion</th>
+            <th scoope="col">Precio</th>
+            <th scope="col">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          {ordenes.map((ord) => (
+            <tr key={ord.id}>
+              <th scope="row">{ord.id}</th>
+              <td>{ord.fecha}</td>
+              <td>{ord.estado}</td>
+              <td>{ord.id_mesa}</td>
+              <td>{ord.id_menu}</td>
+              <td>{ord.nombre}</td>
+              <td>{ord.descripcion}</td>
+              <td>{ord.precio}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </div>
   );
 }

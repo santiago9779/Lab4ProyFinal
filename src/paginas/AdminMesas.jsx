@@ -7,14 +7,14 @@ export const AdminMesas = () => {
   const [mesas, setMesas] = useState([]);
   const [capacidad, setCapacidad] = useState();
   const [ocupada, setOcupada] = useState();
-  const [id_orden, setId_orden] = useState();
   const [editar, setEditar] = useState(false);
 
-  useEffect(() => {
-    fetch(`http://localhost:4000/mesas/`)
-      .then((res) => res.json())
-      .then((mesas) => setMesas(mesas));
-  }, []);
+  const obtenerMesas = async () => {
+    const response = await fetch("http://localhost:4000/mesas");
+    const data = await response.json();
+    setMesas(data);
+  };
+
 
   const agregarMesa = async () => {
     const res = await fetch("http://localhost:4000/mesas/", {
@@ -29,9 +29,9 @@ export const AdminMesas = () => {
       const nuevaMesa = await res.json();
       setMesas([...mesas, nuevaMesa]);
       setCapacidad("");
-      setEstado("");
-      setId_orden("");
+      setOcupada("");
       console.log("Mesa agregada");
+      obtenerMesas()
     } else {
       console.log("Fallo al agregar mesa");
     }
@@ -46,6 +46,7 @@ export const AdminMesas = () => {
       if (res.ok) {
         setMesas(mesas.filter((mesa) => mesa.id !== id));
         console.log("Mesa eliminada");
+        obtenerMesas()
       } else {
         console.log("No se pudo eliminar la mesa");
       }
@@ -57,23 +58,37 @@ export const AdminMesas = () => {
 
     setCapacidad(mesa.capacidad);
     setOcupada(mesa.ocupada);
-    setId_orden(mesa.id_orden);
   };
 
   const limpiarCampos = () => {
     setCapacidad("");
     setOcupada("");
-    setId_orden("");
     setEditar(false);
   };
 
   const actualizarMesa = async () => {
-    axios.put("http://localhost:4000/mesas/", {
-      capacidad: capacidad,
-      ocupada: ocupada,
-      id_orden: id_orden,
+    const res = await fetch("http://localhost:4000/mesas/", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        capacidad: capacidad,
+        ocupada: ocupada,
+      }),
     });
+    if (res.ok) {
+      const nuevaMesa = await res.json();
+      setMesas([...mesas, nuevaMesa]);
+      setCapacidad("");
+      setOcupada("")
+      console.log("Mesa editada");
+      obtenerMesas()
+    } else {
+      console.log("Fallo al editar mesa");
+    }
   };
+  useEffect(() => {
+    obtenerMesas()
+  }, []);
 
   return (
     <>
@@ -95,15 +110,6 @@ export const AdminMesas = () => {
           value={ocupada}
           onChange={(e) => {
             setOcupada(e.target.value);
-          }}
-        />
-        <input
-          className="m-2"
-          type="number"
-          placeholder="id orden"
-          value={id_orden}
-          onChange={(e) => {
-            setId_orden(e.target.value);
           }}
         />
         <div>
@@ -135,7 +141,6 @@ export const AdminMesas = () => {
             <th scope="col">#</th>
             <th scope="col">capacidad</th>
             <th scope="col">ocupada</th>
-            <th scope="col">Id Orden</th>
           </tr>
         </thead>
         <tbody>
@@ -145,7 +150,6 @@ export const AdminMesas = () => {
 
               <td>{mesa.capacidad}</td>
               <td>{mesa.ocupada}</td>
-              <td>{mesa.id_orden}</td>
               <td>
                 <div>
                   <button
